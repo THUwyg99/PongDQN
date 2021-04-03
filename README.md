@@ -1,7 +1,7 @@
 # PongDQN
 
 ## Introduction
-Deep Q-learning algorithm on the Atari Pong environment.
+A simple implementation of the Deep Q-learning algorithm on the Atari Pong environment.
 
 
 ## Requirements
