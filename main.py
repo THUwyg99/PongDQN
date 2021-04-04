@@ -18,6 +18,8 @@ import torch.optim as optim
 import torch.nn.functional as F
 import torchvision.transforms as T
 
+import matplotlib.pyplot as plt
+
 Transition = namedtuple('Transion',
                         ('state', 'action', 'next_state', 'reward'))
 
@@ -120,11 +122,45 @@ def train(env, n_episodes, render=False):
         #if episode % 20 == 0:
         if episode % 2 == 0:
                 print('Total steps: {} \t Episode: {}/{} \t Total reward: {}'.format(steps_done, episode, t, total_reward))
+
+        f = open('./rewards/reward.txt', 'a+')
+        f.write(str(total_reward))
+        f.write('\n')
+        f.close()
+
     env.close()
     return
 
+def Reward(dir):
+    f = open(dir, 'r')
+    lines = f.readlines()  # 返回所有的行
+    #lines = lines[0:1000]
+    reward = []
+    reward_mean = []
+    for i in range(len(lines)):
+        line = lines[i]
+        data = line.split()  #reward 与/n 分割
+        reward.append((float(data[0])))
+        reward_mean.append(np.mean(reward[-10:]))
+
+    f.close()
+    return reward, reward_mean
+
+def PlotReward(dir):
+    reward, reward_mean = Reward(dir)
+    #print(reward_mean)
+    plt.figure(1, figsize=(10, 5))
+    plt.subplot(121)
+    plt.plot(range(len(reward)), reward, label='DQN')
+    plt.show()
+    plt.subplot(122)
+    plt.plot(range(len(reward_mean)), reward_mean, label='DQN-mean')
+    plt.show()
+
+
+
 def test(env, n_episodes, policy, render=True):
-    env = gym.wrappers.Monitor(env, './videos/' + 'dqn_pong_video')
+    env = gym.wrappers.Monitor(env, './videos/' + 'dqn_pong_video', force=True)
     for episode in range(n_episodes):
         obs = env.reset()
         state = get_state(obs)
@@ -157,7 +193,7 @@ def test(env, n_episodes, policy, render=True):
 if __name__ == '__main__':
     # set device
     #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    device = torch.device("cpu")
+    '''device = torch.device("cpu")
 
     # hyperparameters
     BATCH_SIZE = 32
@@ -191,8 +227,15 @@ if __name__ == '__main__':
     
     # train model
     #train(env, 400)
-    train(env, 40)
+    train(env, 20)
+
+    dir = './rewards/reward.txt'
+    PlotReward(dir)
+
     torch.save(policy_net, "dqn_pong_model")
     policy_net = torch.load("dqn_pong_model")
-    test(env, 1, policy_net, render=False)
+    test(env, 1, policy_net, render=False)'''
+
+    dir = './rewards/reward.txt'
+    PlotReward(dir)
 
