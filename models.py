@@ -58,3 +58,36 @@ class DQN(nn.Module):
         x = F.relu(self.conv3(x))
         x = F.relu(self.fc4(x.view(x.size(0), -1)))
         return self.head(x)
+    
+    
+class DuelingDQN(nn.Module):
+    def __init__(self, inputs_shape=4, n_actions=14):
+        super(DuelingDQN, self).__init__()
+        self.input_shape = inputs_shape
+        self.n_actions = n_actions
+        self.features = nn.Sequential(
+            nn.Conv2d(inputs_shape, 16, kernel_size=8, stride=4),
+            nn.MaxPool2d(2),
+            nn.Conv2d(16, 32, kernel_size=4, stride=2),
+            nn.MaxPool2d(2)
+        )
+        # self.hidden = nn.Sequential(
+        #     nn.Linear(self.features_size(), 256, bias=True),
+        #     nn.ReLU()
+        # )
+        self.adv = nn.Linear(256, n_actions, bias=True)
+        self.val = nn.Linear(256, 1, bias=True)
+
+    def forward(self, x):
+        x = x.float() / 255
+        x = self.features(x)
+        x = x.view(x.size(0), -1)
+        #x = self.hidden(x)
+        x = F.relu(nn.Linear(x.size(-1), 256, bias=True)(x))
+        adv = self.adv(x)
+        val = self.val(x).expand(x.size(0), self.n_actions)
+        x = val + adv - adv.mean(1).unsqueeze(1).expand(x.size(0), self.n_actions)
+        return x
+
+    # def features_size(self):
+    #     return self.features(torch.zeros(1, *self.input_shape)).view(1, -1).size(1)
