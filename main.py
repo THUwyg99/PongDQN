@@ -173,8 +173,12 @@ if __name__ == '__main__':
     MEMORY_SIZE = 10 * INITIAL_MEMORY
 
     # create networks
-    policy_net = DQN(n_actions=4).to(device)
-    target_net = DQN(n_actions=4).to(device)
+    #policy_net = DQN(n_actions=4).to(device)
+    #target_net = DQN(n_actions=4).to(device)
+    #policy_net = DQNbn(n_actions=4).to(device)
+    #target_net = DQNbn(n_actions=4).to(device)
+    policy_net = DuelingDQN(n_actions=4).to(device)
+    target_net = DuelingDQN(n_actions=4).to(device)
     target_net.load_state_dict(policy_net.state_dict())
 
     # setup optimizer
@@ -190,8 +194,7 @@ if __name__ == '__main__':
     memory = ReplayMemory(MEMORY_SIZE)
     
     # train model
-    #train(env, 400)
-    train(env, 40)
+    train(env, 800)
     torch.save(policy_net, "dqn_pong_model")
     policy_net = torch.load("dqn_pong_model")
     test(env, 1, policy_net, render=False)
